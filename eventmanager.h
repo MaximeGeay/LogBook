@@ -29,16 +29,22 @@ public slots:
 private slots:
     void clickOnDebProfil();
     void clickOnFinProfil();
+    void clickOnSippican();
+    void clickOnLoadSip();
+    void clickOnNewEvent();
     void clickOnAnnuler();
     void clickOnValider();
-    void writeDatas();
+    void clickOnMajDatas();
+    void clickOnDebAcquisition();
+    void clickOnFinAcquisition();
 private:
     Ui::EventManager *ui;
 
 
     EventSettings::eventProperties mEventType;
     NavData::Datas mCurrentData;
-    bool mProfilStatus;
+    bool mProfilStatus=false;
+    bool mAcquisitionStatus=false;
 
 };
 

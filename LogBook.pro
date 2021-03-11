@@ -12,24 +12,27 @@ SOURCES += \
     eventlistmodel.cpp \
     eventmanager.cpp \
     eventsettings.cpp \
+    fenmission.cpp \
     fenpreferences.cpp \
+    logbookmodel.cpp \
     main.cpp \
     mainwindow.cpp \
-    navdata.cpp \
-    test.cpp
+    navdata.cpp
 
 HEADERS += \
     eventlistmodel.h \
     eventmanager.h \
     eventsettings.h \
+    fenmission.h \
     fenpreferences.h \
+    logbookmodel.h \
     mainwindow.h \
-    navdata.h \
-    test.h
+    navdata.h
 
 FORMS += \
     eventmanager.ui \
     eventsettings.ui \
+    fenmission.ui \
     fenpreferences.ui \
     mainwindow.ui \
     navdata.ui

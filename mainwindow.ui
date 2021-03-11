@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1222</width>
+    <width>1230</width>
     <height>600</height>
    </rect>
   </property>
@@ -15,9 +15,6 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QLineEdit" name="lineEdit"/>
-    </item>
     <item row="1" column="0">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
@@ -58,7 +55,7 @@
              <x>0</x>
              <y>0</y>
              <width>1153</width>
-             <height>450</height>
+             <height>426</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_3">
@@ -89,6 +86,13 @@
       </property>
      </widget>
     </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="l_CurrentLogbook">
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+     </widget>
+    </item>
    </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -96,7 +100,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1222</width>
+     <width>1230</width>
      <height>21</height>
     </rect>
    </property>
@@ -107,7 +111,21 @@
     <addaction name="actionPreferences"/>
     <addaction name="actionQuitter"/>
    </widget>
+   <widget class="QMenu" name="menuAdministration">
+    <property name="title">
+     <string>Administration</string>
+    </property>
+    <addaction name="action_OpenConf"/>
+   </widget>
+   <widget class="QMenu" name="menuFichier_2">
+    <property name="title">
+     <string>Fichier</string>
+    </property>
+    <addaction name="action_NewLogbook"/>
+   </widget>
+   <addaction name="menuFichier_2"/>
    <addaction name="menuFichier"/>
+   <addaction name="menuAdministration"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionPreferences">
@@ -118,6 +136,16 @@
   <action name="actionQuitter">
    <property name="text">
     <string>Quitter</string>
+   </property>
+  </action>
+  <action name="action_OpenConf">
+   <property name="text">
+    <string>Ouvrir le répertoire du fichier de configuration</string>
+   </property>
+  </action>
+  <action name="action_NewLogbook">
+   <property name="text">
+    <string>Nouveau Cahier de quart</string>
    </property>
   </action>
  </widget>

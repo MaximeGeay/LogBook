@@ -26,13 +26,18 @@ bool EventListModel::initXML(QString sPath)
 {
 
     if(!QFile::exists(sPath))
-        creeXML(sPath);
+        if(!creeXML(sPath))
+            emit xmlError("Création du fichier de configuration XML impossible");
 
     mXMLFileIsInit=readXML(sPath);
     if(mXMLFileIsInit)
     {
         mPathToXML=sPath;
         initModel();
+    }
+    else
+    {
+        emit xmlError("Lecture du fichier de configuration XML impossible");
     }
 
     return mXMLFileIsInit;

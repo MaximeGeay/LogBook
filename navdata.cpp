@@ -17,7 +17,7 @@ NavData::NavData(QWidget *parent) :
     mTimer->setSingleShot(true);
     mDateHeurePrec=QDateTime::currentDateTimeUtc();
 
-    initCom();
+    //initCom();
     QObject::connect(mGPSSocket,&QUdpSocket::readyRead,this,&NavData::readData);
     QObject::connect(mTimer,&QTimer::timeout,this,&NavData::dataTimeout);
     QObject::connect(mTimerTime,&QTimer::timeout,this,&NavData::majHeure);
@@ -32,7 +32,8 @@ NavData::~NavData()
 
 void NavData::initCom()
 {
-    bool bRes=false;
+
+
     QSettings settings;
     if(mPortGPS!=0)
     {
@@ -42,16 +43,18 @@ void NavData::initCom()
 
     mPortGPS=settings.value("PortGPS",20005).toInt();
 
-    if(mGPSSocket->bind(QHostAddress::Any,mPortGPS))
+    if(mGPSSocket->bind(QHostAddress::Any,mPortGPS,QAbstractSocket::ReuseAddressHint))
     {
          emit errorString(QString("Connecté au port UDP %1").arg(mPortGPS));
-        bRes=true;
+
     }
     else
     {
         emit errorString(mGPSSocket->errorString());
-        bRes=false;
+
+
     }
+
 }
 
 NavData::Datas NavData::getLastData()
