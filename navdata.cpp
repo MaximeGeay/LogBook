@@ -8,25 +8,46 @@ NavData::NavData(QWidget *parent) :
     ui(new Ui::NavData)
 {
     ui->setupUi(this);
-    mPortGPS=0;
-    mGPSSocket=new QUdpSocket();
-    mTimer=new QTimer;
+    mUdpGPS=new UDPData();
+    mUdpCelerite=new UDPData();
+    mUdpSonde=new UDPData();
+    mUdpSBE=new UDPData();
     mTimerTime=new QTimer;
 
-    mTimer->setInterval(3000);
-    mTimer->setSingleShot(true);
+    mUdpGPS->setInterval(3000);
+    mUdpSonde->setInterval(3000);
+    mUdpCelerite->setInterval(3000);
+    mUdpSBE->setInterval(10000);
+
     mDateHeurePrec=QDateTime::currentDateTimeUtc();
 
     //initCom();
-    QObject::connect(mGPSSocket,&QUdpSocket::readyRead,this,&NavData::readData);
-    QObject::connect(mTimer,&QTimer::timeout,this,&NavData::dataTimeout);
+    QObject::connect(mUdpGPS,&UDPData::dataReceived,this,&NavData::readData);
+    QObject::connect(mUdpGPS,&UDPData::timeout,this,&NavData::gpsTimeout);
+    QObject::connect(mUdpGPS,&UDPData::errorString,this,&NavData::udpError);
+
+    QObject::connect(mUdpSonde,&UDPData::dataReceived,this,&NavData::readData);
+    QObject::connect(mUdpSonde,&UDPData::timeout,this,&NavData::sondeTimeout);
+    QObject::connect(mUdpSonde,&UDPData::errorString,this,&NavData::udpError);
+
+    QObject::connect(mUdpCelerite,&UDPData::dataReceived,this,&NavData::readData);
+    QObject::connect(mUdpCelerite,&UDPData::timeout,this,&NavData::celTimeout);
+    QObject::connect(mUdpCelerite,&UDPData::errorString,this,&NavData::udpError);
+
+    QObject::connect(mUdpSBE,&UDPData::dataReceived,this,&NavData::readData);
+    QObject::connect(mUdpSBE,&UDPData::timeout,this,&NavData::SBETimeout);
+    QObject::connect(mUdpSBE,&UDPData::errorString,this,&NavData::udpError);
+
     QObject::connect(mTimerTime,&QTimer::timeout,this,&NavData::majHeure);
     mTimerTime->start(100);
 }
 
 NavData::~NavData()
 {
-    mGPSSocket->close();
+    delete mUdpGPS;
+    delete mUdpSonde;
+    delete mUdpCelerite;
+    delete mUdpSBE;
     delete ui;
 }
 
@@ -35,57 +56,34 @@ void NavData::initCom()
 
 
     QSettings settings;
-    if(mPortGPS!=0)
-    {
-        //close connection
-        mGPSSocket->close();
-    }
-
-    mPortGPS=settings.value("PortGPS",20005).toInt();
-
-    if(mGPSSocket->bind(QHostAddress::Any,mPortGPS,QAbstractSocket::ReuseAddressHint))
-    {
-         emit errorString(QString("Connecté au port UDP %1").arg(mPortGPS));
-
-    }
-    else
-    {
-        emit errorString(mGPSSocket->errorString());
+    if(mUdpGPS->UdpPort()!=0)
+        mUdpGPS->close();
+    if(mUdpSonde->UdpPort()!=0)
+        mUdpSonde->close();
+    if(mUdpCelerite->UdpPort()!=0)
+        mUdpCelerite->close();
+    if(mUdpSBE->UdpPort()!=0)
+        mUdpSBE->close();
 
 
-    }
+
+    mUdpGPS->initCom(settings.value("PortGPS",21006).toInt());
+    mUdpSonde->initCom(settings.value("PortSonde",12044).toInt());
+    mUdpCelerite->initCom(settings.value("PortCelerimetre",21035).toInt());
+    mUdpSBE->initCom(settings.value("PortSBE",21021).toInt());
 
 }
 
-NavData::Datas NavData::getLastData()
+NavData::stGPSDatas NavData::getLastGPS()
 {
-    return mLastData;
+    return mLastGPS;
 }
 
-void NavData::readData()
+void NavData::readData(QString sTrame)
 {
-     Datas uneData;
-    while (mGPSSocket->hasPendingDatagrams())
-    {
-        QByteArray datagram;
-        datagram.resize(mGPSSocket->pendingDatagramSize());
-        mGPSSocket-> readDatagram(datagram.data(),datagram.size()); // datagram.data est un char
-        QString sTrame=datagram.data();  // convertion qbytearray en string
-       // emit dataReceived(mParam.Name,sTrame); // transmission du signal avec la trame recu
+     stGPSDatas uneData;
+     stSBEDatas uneSBE;
 
-
-        /*
-$GPRMC,225446,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E*68
-225446 = Heure du Fix 22:54:46 UTC
-A = Alerte du logiciel de navigation ( A = OK, V = warning (alerte)
-4916.45,N = Latitude 49 deg. 16.45 min North
-12311.12,W = Longitude 123 deg. 11.12 min West
-000.5 = vitesse sol, Noeuds
-054.7 = cap (vrai)
-191194 = Date du fix 19 Novembre 1994
-020.3,E = Déclinaison Magnétique 20.3 deg Est
-*68 = checksum obligatoire
-*/
         if(sTrame.section(",",0,0)=="$INRMC" || sTrame.section(",",0,0)=="$GPRMC")
         {
             QString sDateHeure=sTrame.section(",",1,1).section(".",0,0)+" "+sTrame.section(",",9,9);
@@ -115,23 +113,78 @@ A = Alerte du logiciel de navigation ( A = OK, V = warning (alerte)
             ui->l_COG->setText(QString("Route fond: %1°").arg(QString::number(uneData.COG,'f',0)));
             ui->l_SOG->setText(QString("Vitesse fond: %1 nds").arg(QString::number(uneData.SOG,'f',1)));
 
-            mLastData=uneData;
-            emit dataReceived(uneData);
-            mTimer->start();
+            mLastGPS=uneData;
+            emit gpsReceived(uneData);
+
 
 
         }
 
-    }
+         if(sTrame.section(",",0,0)=="$INDPT" || sTrame.section(",",0,0)=="$GPDPT" || sTrame.section(",",0,0)=="$SDDPT")
+         {
+             mLastSonde=sTrame.section(",",1,1).toDouble();
+             ui->l_Sonde->setText(QString("Sonde: %1m").arg(QString::number(mLastSonde,'f',1)));
+             emit sondeReceived(mLastSonde);
+         }
+         if(!sTrame.contains(","))
+         {
+             sTrame=sTrame.remove(" \r\n");
+             double dCel=sTrame.toDouble();
+             if(dCel>1400&&dCel<1600)
+             {
+                 mLastCelerite=dCel;
+                 ui->l_Celerimetre->setText(QString("Célérimètre: %1 m/s").arg(QString::number(mLastCelerite,'f',1)));
+                 emit celReceived(mLastCelerite);
+             }
+
+         }
+
+         if(sTrame.section(",",0,0)=="$SBTSG")
+         {
+             uneSBE.tempCuve=sTrame.section(",",10,10).toDouble();
+             uneSBE.tempExt=sTrame.section(",",11,11).toDouble();
+             uneSBE.conductivite=sTrame.section(",",12,12).toDouble();
+             uneSBE.salinite=sTrame.section(",",13,13).toDouble();
+             uneSBE.celerite=sTrame.section(",",14,14).toDouble();
+             uneSBE.dispo=true;
+             ui->l_salinite->setText(QString("Salinité: %1 psu").arg(uneSBE.salinite));
+             ui->l_CelSBE->setText(QString("Célérité SBE: %1 m/s").arg(uneSBE.celerite));
+             ui->l_Temperature->setText(QString("Température: %1 °C").arg(uneSBE.tempExt));
+             mLastSBE=uneSBE;
+             emit sbeReceived(mLastSBE);
+
+         }
+
+
+
+
 }
 
-void NavData::dataTimeout()
+void NavData::sondeTimeout()
 {
-    ui->l_DateHeureGPS->setText("Données non reçues");
+    ui->l_Sonde->setText("Sonde:");
+}
+
+void NavData::celTimeout()
+{
+    ui->l_Celerimetre->setText("Célérimètre:");
+}
+
+void NavData::SBETimeout()
+{
+    ui->l_Temperature->setText("Température:");
+    ui->l_salinite->setText("Salinité:");
+    ui->l_CelSBE->setText("Célérité SBE:");
+    mLastSBE.dispo=false;
+}
+
+void NavData::gpsTimeout()
+{
+    ui->l_DateHeureGPS->setText("Données GPS non reçues");
     ui->l_Position->setText(QString("Position:"));
     ui->l_COG->setText(QString("Route fond:"));
     ui->l_SOG->setText(QString("Vitesse fond:"));
-    mLastData.dispo=false;
+    mLastGPS.dispo=false;
 }
 
 void NavData::majHeure()
@@ -142,6 +195,11 @@ void NavData::majHeure()
         mDateHeurePrec=currentTime;
         ui->l_dtPC->setText(QString("Heure PC: %1").arg(currentTime.toString("dd/MM/yyyy hh:mm:ss")));
     }
+}
+
+void NavData::udpError(QString sMsg)
+{
+    emit errorString(sMsg);
 }
 
 double NavData::latMinToDec(QString sLatitude)

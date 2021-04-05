@@ -51,9 +51,21 @@ FenPreferences::~FenPreferences()
 void FenPreferences::initFen()
 {
     QSettings settings;
-    int nPortGps=settings.value("PortGPS",20005).toInt();
+    int nPortGps=settings.value("PortGPS",21006).toInt();
+    int nPortSonde=settings.value("PortSonde",12044).toInt();
+    int nPortCeletimetre=settings.value("PortCelerimetre",21035).toInt();
+    int nPortSBE=settings.value("PortSBE",21021).toInt();
+    bool bRefCelerite=settings.value("RefCelerite",0).toInt();
     ui->sp_PortGPS->setValue(nPortGps);
+    ui->sp_PortSonde->setValue(nPortSonde);
+    ui->sp_PortCel->setValue(nPortCeletimetre);
+    ui->sp_PortSBE->setValue(nPortSBE);
     ui->le_ConfigXML->setText(mPathToConfXML);
+    ui->le_LogbookDir->setText(mPathToLogbookDir);
+    ui->rad_SBE->setChecked(!bRefCelerite);
+    ui->Rad_Celerimetre->setChecked(bRefCelerite);
+
+
 
 
     this->show();
@@ -79,6 +91,10 @@ void FenPreferences::clickOnValider()
 {
     QSettings settings;
     settings.setValue("PortGPS",ui->sp_PortGPS->value());
+    settings.setValue("PortSonde",ui->sp_PortSonde->value());
+    settings.setValue("PortCelerimetre",ui->sp_PortCel->value());
+    settings.setValue("PortSBE",ui->sp_PortSBE->value());
+    settings.setValue("RefCelerite",ui->Rad_Celerimetre->isChecked());
     if(mPathToConfXML!=ui->le_ConfigXML->text())
     {
         QString sPath=ui->le_ConfigXML->text();

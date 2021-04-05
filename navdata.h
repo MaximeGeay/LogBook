@@ -1,11 +1,11 @@
-#ifndef NAVDATA_H
+﻿#ifndef NAVDATA_H
 #define NAVDATA_H
 
 #include <QWidget>
-#include <QUdpSocket>
 #include <QGeoCoordinate>
 #include <QDateTime>
 #include <QTimer>
+#include "udpdata.h"
 
 namespace Ui {
 class NavData;
@@ -17,11 +17,26 @@ class NavData : public QWidget
 
 public:
 
-    struct Datas{
+    struct stGPSDatas{
         QGeoCoordinate position;
         double SOG=0,COG=0;
         QDateTime dateheure;
         bool dispo=false;
+    };
+    struct stSBEDatas{
+        double tempCuve=0;
+        double tempExt=0;
+        double salinite=0;
+        double conductivite=0;
+        double celerite=0;
+        bool dispo=false;
+
+    };
+    struct stSensorsDatas{
+        stGPSDatas GPS;
+        stSBEDatas SBE;
+        double depth=0;
+        double celerimeter=0;
     };
 
     explicit NavData(QWidget *parent = nullptr);
@@ -30,27 +45,40 @@ public:
 
 
 signals:
-    void dataReceived(Datas);
+    void gpsReceived(stGPSDatas);
+    void sondeReceived(double);
+    void celReceived(double);
+    void sbeReceived(stSBEDatas);
     void errorString(QString);
 
 public slots:
     void initCom();
-    Datas getLastData();
+    stGPSDatas getLastGPS();
 
 private slots:
-     void readData();
-     void dataTimeout();
+     void readData(QString sTrame);
+     void gpsTimeout();
+     void sondeTimeout();
+     void celTimeout();
+     void SBETimeout();
      void majHeure();
+     void udpError(QString sMsg);
 
 private:
     Ui::NavData *ui;
-    int mPortGPS;
-    QUdpSocket* mGPSSocket;
+
+    UDPData *mUdpGPS;
+    UDPData *mUdpSonde;
+    UDPData *mUdpCelerite;
+    UDPData *mUdpSBE;
     double latMinToDec(QString sLatitude);
     double longMinToDec(QString sLongitude);
-    QTimer * mTimer;
+
     QTimer *mTimerTime;
-    Datas mLastData;
+    stGPSDatas mLastGPS;
+    stSBEDatas mLastSBE;
+    double mLastCelerite=0;
+    double mLastSonde=0;
     QDateTime mDateHeurePrec;
 };
 

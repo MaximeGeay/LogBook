@@ -6,25 +6,18 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>447</width>
-    <height>145</height>
+    <width>606</width>
+    <height>95</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <widget class="QLabel" name="l_DateHeureGPS">
+   <item row="2" column="7">
+    <widget class="QLabel" name="l_Temperature">
      <property name="text">
-      <string>Données non reçues</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1" rowspan="2">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+      <string>Température :</string>
      </property>
     </widget>
    </item>
@@ -35,31 +28,80 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="3">
-    <widget class="Line" name="line_2">
+   <item row="0" column="1" rowspan="3">
+    <widget class="Line" name="line">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
     </widget>
    </item>
-   <item row="0" column="4">
-    <widget class="QLabel" name="l_SOG">
-     <property name="text">
-      <string>Vitesse Fond :</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QLabel" name="l_dtPC">
      <property name="text">
       <string/>
      </property>
     </widget>
    </item>
-   <item row="1" column="2" colspan="3">
+   <item row="1" column="7">
+    <widget class="QLabel" name="l_CelSBE">
+     <property name="text">
+      <string>Célérité SBE:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="4" rowspan="3">
+    <widget class="Line" name="line_3">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="l_DateHeureGPS">
+     <property name="text">
+      <string>Données non reçues</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="2">
     <widget class="QLabel" name="l_Position">
      <property name="text">
       <string>Position :</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="6" rowspan="3">
+    <widget class="Line" name="line_4">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QLabel" name="l_SOG">
+     <property name="text">
+      <string>Vitesse Fond :</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="7">
+    <widget class="QLabel" name="l_salinite">
+     <property name="text">
+      <string>Salinité :</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="5">
+    <widget class="QLabel" name="l_Sonde">
+     <property name="text">
+      <string>Sonde :</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="5">
+    <widget class="QLabel" name="l_Celerimetre">
+     <property name="text">
+      <string>Célérimètre :</string>
      </property>
     </widget>
    </item>

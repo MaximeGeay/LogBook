@@ -19,6 +19,13 @@ fenMission::fenMission(QWidget *parent) :
     QObject::connect(ui->btn_Valider,&QPushButton::clicked,this,&fenMission::valider);
     QObject::connect(ui->btn_Annuler,&QPushButton::clicked,this,&fenMission::annuler);
     QObject::connect(ui->cb_Admin,&QCheckBox::stateChanged,this,&fenMission::setAdmin);
+    mCurrentCruise.sNom=mSettings->value("Mission/Nom","").toString();
+    mCurrentCruise.sZone=mSettings->value("Mission/Zone","").toString();
+    mCurrentCruise.sNavire=mSettings->value("Mission/Navire","").toString();
+    mCurrentCruise.sChefMission=mSettings->value("Mission/ChefMission","").toString();
+    mCurrentCruise.dateDebut=mSettings->value("Mission/DateDebut","").toDate();
+    mCurrentCruise.dateFin=mSettings->value("Mission/DateFin","").toDate();
+    mCurrentCruise.sOperateurs=mSettings->value("Mission/Operateurs","").toString();
 
 
 }
@@ -30,7 +37,8 @@ fenMission::~fenMission()
 
 fenMission::st_Mission fenMission::getCurrentCruise()
 {
-    st_Mission currentCruise;
+    return mCurrentCruise;
+  /*  st_Mission currentCruise;
     currentCruise.sNom=mSettings->value("Mission/Nom","").toString();
     currentCruise.sZone=mSettings->value("Mission/Zone","").toString();
     currentCruise.sNavire=mSettings->value("Mission/Navire","").toString();
@@ -38,10 +46,10 @@ fenMission::st_Mission fenMission::getCurrentCruise()
     currentCruise.dateDebut=mSettings->value("Mission/DateDebut","").toDate();
     currentCruise.dateFin=mSettings->value("Mission/DateFin","").toDate();
     currentCruise.sOperateurs=mSettings->value("Mission/Operateurs","").toString();
-    currentCruise.listDataGroups=mSettings->value("Mission/DataGroups","").toStringList();
-    currentCruise.sPath=mSettings->value("Mission/Path","").toString();
+    //currentCruise.listDataGroups=mSettings->value("Mission/DataGroups","").toStringList();
+    //currentCruise.sPath=mSettings->value("Mission/Path","").toString();
 
-    return currentCruise;
+    return currentCruise;*/
 }
 
 void fenMission::newCruise()
@@ -82,7 +90,20 @@ void fenMission::editCruise()
 
 QString fenMission::getCurrentCruiseName()
 {
-    return mSettings->value("Mission/Nom","").toString();
+    return mCurrentCruise.sNom;
+    //return mSettings->value("Mission/Nom","").toString();
+}
+
+void fenMission::setCurrentCruise(fenMission::st_Mission currentCruise)
+{
+    mCurrentCruise=currentCruise;
+    mSettings->setValue("Mission/Nom",currentCruise.sNom);
+    mSettings->setValue("Mission/Zone",currentCruise.sZone);
+    mSettings->setValue("Mission/Navire",currentCruise.sNavire);
+    mSettings->setValue("Mission/ChefMission",currentCruise.sChefMission);
+    mSettings->setValue("Mission/DateDebut",currentCruise.dateDebut);
+    mSettings->setValue("Mission/DateFin",currentCruise.dateFin);
+    mSettings->setValue("Mission/Operateurs",currentCruise.sOperateurs);
 }
 
 
@@ -114,9 +135,15 @@ void fenMission::valider()
     mSettings->setValue("Mission/Operateurs",currentCruise.sOperateurs);
 
     if(mNewCruise)
+    {      
         emit newCruiseSet(currentCruise.sNom);
+
+    }
+
+    emit newCruiseDetails(currentCruise);
     emit editingFinished();
 
+    mCurrentCruise=currentCruise;
 
     this->close();
 }

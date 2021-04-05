@@ -9,6 +9,9 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    customtablemodel.cpp \
+    depouillement.cpp \
+    eventdetails.cpp \
     eventlistmodel.cpp \
     eventmanager.cpp \
     eventsettings.cpp \
@@ -17,9 +20,13 @@ SOURCES += \
     logbookmodel.cpp \
     main.cpp \
     mainwindow.cpp \
-    navdata.cpp
+    navdata.cpp \
+    udpdata.cpp
 
 HEADERS += \
+    customtablemodel.h \
+    depouillement.h \
+    eventdetails.h \
     eventlistmodel.h \
     eventmanager.h \
     eventsettings.h \
@@ -27,9 +34,12 @@ HEADERS += \
     fenpreferences.h \
     logbookmodel.h \
     mainwindow.h \
-    navdata.h
+    navdata.h \
+    udpdata.h
 
 FORMS += \
+    depouillement.ui \
+    eventdetails.ui \
     eventmanager.ui \
     eventsettings.ui \
     fenmission.ui \
@@ -41,3 +51,6 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    icons.qrc

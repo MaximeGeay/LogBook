@@ -17,8 +17,8 @@
    <string>Mission</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/icon.ico</normaloff>:/icon.ico</iconset>
+   <iconset resource="icons.qrc">
+    <normaloff>:/icones/notes.png</normaloff>:/icones/notes.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="3" column="0">
@@ -147,6 +147,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="icons.qrc"/>
+ </resources>
  <connections/>
 </ui>

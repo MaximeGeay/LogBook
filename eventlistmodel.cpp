@@ -262,7 +262,7 @@ bool EventListModel::majXML()
        while(it.hasNext())
        {
            uneData=it.next();
-           qDebug()<<uneData.name;
+
            addElement(uneData);
        }
        bMajOK=true;

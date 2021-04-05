@@ -19,20 +19,22 @@ public:
 
     struct st_Mission
     {
-        QString sNom,sNavire,sChefMission,sZone,sOperateurs,sPath;
-        QStringList listDataGroups;
+        QString sNom,sNavire,sChefMission,sZone,sOperateurs;
+        //QStringList listDataGroups;
         QDate dateDebut,dateFin;
     };
 
     explicit fenMission(QWidget *parent = nullptr);
     ~fenMission();
 
-    st_Mission getCurrentCruise();
+
 
 public slots:
     void newCruise();
     void editCruise();
     QString getCurrentCruiseName();
+    void setCurrentCruise(st_Mission currentCruise);
+    st_Mission getCurrentCruise();
 
 
 private slots:
@@ -43,12 +45,14 @@ private slots:
 signals:
     void editingFinished();
     void newCruiseSet(QString sNewCruise);
+    void newCruiseDetails(st_Mission);
 
 private:
     Ui::fenMission *ui;
 
     QSettings *mSettings;
 
+    st_Mission mCurrentCruise;
     bool mNewCruise=false;
 
 
