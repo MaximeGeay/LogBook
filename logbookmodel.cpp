@@ -1,3 +1,4 @@
+#include<QGuiApplication>
 #include "logbookmodel.h"
 
 LogbookModel::LogbookModel(QObject *parent) : QStandardItemModel(parent)
@@ -40,6 +41,8 @@ void LogbookModel::modifyEvent(LogbookModel::stLogbookData eventToFind)
     bool bFound=false;
     int i=0;
 
+    QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+
     while(it.hasNext())
     {
         unEvent=it.next();
@@ -59,6 +62,8 @@ void LogbookModel::modifyEvent(LogbookModel::stLogbookData eventToFind)
 
 
     }
+
+    QGuiApplication::restoreOverrideCursor();
 }
 
 void LogbookModel::removeEvent(LogbookModel::stLogbookData eventToFind)
@@ -68,6 +73,7 @@ void LogbookModel::removeEvent(LogbookModel::stLogbookData eventToFind)
     stLogbookData unEvent;
     bool bFound=false;
     int i=0;
+    QGuiApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     while(it.hasNext())
     {
@@ -88,6 +94,7 @@ void LogbookModel::removeEvent(LogbookModel::stLogbookData eventToFind)
 
 
     }
+    QGuiApplication::restoreOverrideCursor();
 
 }
 void LogbookModel::selectEvent(const QModelIndex ind)
@@ -122,7 +129,6 @@ LogbookModel::stLogbookData LogbookModel::findEvent(int nIndex)
 void LogbookModel::setCurrentCruise(fenMission::st_Mission stCruise)
 {
     mCurrentCruise=stCruise;
-    qDebug()<<"CurrentCruise"<<mCurrentCruise.sNom<<mCurrentCruise.sChefMission;
     majXML();
 }
 
@@ -134,6 +140,12 @@ fenMission::st_Mission LogbookModel::getCurrentCruise()
 QString LogbookModel::getCurrentLogbookPath()
 {
     return mPathToXML;
+}
+
+void LogbookModel::setNewLogbookPath(QString sPath)
+{
+    mPathToXML=sPath;
+    mEventList.clear();
 }
 
 void LogbookModel::addDomElement(QDomElement element)
@@ -150,6 +162,7 @@ void LogbookModel::addDomElement(QDomElement element)
 
     QString write_doc=mDomEventList->toString();
 
+
     QFile fichier(mPathToXML);
     if(!fichier.open(QIODevice::WriteOnly))
     {
@@ -159,6 +172,45 @@ void LogbookModel::addDomElement(QDomElement element)
     }
 
     QTextStream stream(&fichier);
+    stream.setCodec("UTF-8");
+
+    stream<<write_doc;
+
+    fichier.close();
+}
+
+void LogbookModel::addElementList(QList<QDomElement> elementList)
+{
+    if(!mXMLFileIsInit)
+    {
+        qDebug()<<"LogbookXML non initialisé";
+        return;
+    }
+
+    QDomElement docElem = mDomEventList->documentElement();
+
+    QListIterator<QDomElement>it(elementList);
+    QDomElement element;
+    while(it.hasNext())
+    {
+        element=it.next();
+        docElem.appendChild(element);
+    }
+
+
+    QString write_doc=mDomEventList->toString();
+
+
+    QFile fichier(mPathToXML);
+    if(!fichier.open(QIODevice::WriteOnly))
+    {
+        fichier.close();
+        emit xmlError( "Impossible d'écrire dans le document XML");
+        return;
+    }
+
+    QTextStream stream(&fichier);
+    stream.setCodec("UTF-8");
 
     stream<<write_doc;
 
@@ -178,17 +230,19 @@ bool LogbookModel::majXML()
 
        QListIterator<stLogbookData>it(mEventList);
         stLogbookData unEvent;
+        QList<QDomElement> elementList;
        while(it.hasNext())
        {
            unEvent=it.next();
-          addDomElement(setLogbookDataToAttributes(unEvent));
+           elementList.append(setLogbookDataToAttributes(unEvent));
        }
+       addElementList(elementList);
        bMajOK=true;
     }
 
 
     initXML(mPathToXML);
-    initModel();
+   // initModel();
 
     return bMajOK;
 }
@@ -278,7 +332,6 @@ void LogbookModel::initModel()
         {
             uneLigne=setAttributesToLogbookData(Component);
             mLastIndex+=1;
-
             appendData(uneLigne);
 
         }
@@ -296,6 +349,7 @@ void LogbookModel::appendData(LogbookModel::stLogbookData unEvent)
     QStandardItem* iTitre=new QStandardItem(unEvent.titre);
     QStandardItem* iEquipement=new QStandardItem(unEvent.equipement);
     QStandardItem* iCommentaire=new QStandardItem(unEvent.commentaire);
+
 
     QList<QStandardItem*> list;
     list<<iID<<iDate<<iEquipement<<iTitre<<iCommentaire;

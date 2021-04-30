@@ -25,7 +25,9 @@ public slots:
     void initFen();
     QList<EventSettings::eventProperties> getEventTypeList();
     void openRepConf();
-    QString getLogbookDir();
+    QString getCurrentLogbookDir();
+    QString getDefaultLogbookDir();
+    void setCurrentLogbookDir(QString sPath);
 
 private slots:
     void clickOnValider();
@@ -42,7 +44,8 @@ private:
     Ui::FenPreferences *ui;
 
     QString mPathToConfXML;
-    QString mPathToLogbookDir;
+    QString mPathToCurrentLogbookDir;
+    QString mPathToDefaultLogbookDir;
     EventSettings* mEventSettings;
     EventListModel* mEventListModel;
 

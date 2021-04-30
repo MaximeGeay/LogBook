@@ -90,6 +90,7 @@ void EventListModel::addElement(EventSettings::eventProperties properties)
     }
 
     QTextStream stream(&fichier);
+    stream.setCodec("UTF-8");
 
     stream<<write_doc;
 

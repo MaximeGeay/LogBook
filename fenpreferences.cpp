@@ -36,7 +36,8 @@ FenPreferences::FenPreferences(QWidget *parent) :
         dir.mkpath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
 
     mPathToConfXML=settings.value("PathToConfXML",QString("%1/config_logbook.xml").arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))).toString();
-    mPathToLogbookDir=settings.value("PathToLogbookDir",QString("%1").arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))).toString();
+    mPathToDefaultLogbookDir=settings.value("PathToDefaultLogbookDir",QString("%1").arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))).toString();
+    mPathToCurrentLogbookDir=settings.value("PathToCurrentLogbookDir",QString("%1").arg(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation))).toString();
     mEventListModel->initXML(mPathToConfXML);
     ui->tb_ListEvent->setModel(mEventListModel);
 
@@ -61,7 +62,7 @@ void FenPreferences::initFen()
     ui->sp_PortCel->setValue(nPortCeletimetre);
     ui->sp_PortSBE->setValue(nPortSBE);
     ui->le_ConfigXML->setText(mPathToConfXML);
-    ui->le_LogbookDir->setText(mPathToLogbookDir);
+    ui->le_LogbookDir->setText(mPathToDefaultLogbookDir);
     ui->rad_SBE->setChecked(!bRefCelerite);
     ui->Rad_Celerimetre->setChecked(bRefCelerite);
 
@@ -82,9 +83,26 @@ void FenPreferences::openRepConf()
     QDesktopServices::openUrl(mPathToConfXML.section("/",0,n-1));
 }
 
-QString FenPreferences::getLogbookDir()
+QString FenPreferences::getCurrentLogbookDir()
 {
-    return mPathToLogbookDir;
+    return mPathToCurrentLogbookDir;
+}
+
+QString FenPreferences::getDefaultLogbookDir()
+{
+    return mPathToDefaultLogbookDir;
+}
+
+void FenPreferences::setCurrentLogbookDir(QString sPath)
+{
+    QDir dir(sPath);
+    if(dir.exists())
+    {
+        mPathToCurrentLogbookDir=sPath;
+        QSettings settings;
+        settings.setValue("PathToCurrentLogbookDir",mPathToCurrentLogbookDir);
+    }
+
 }
 
 void FenPreferences::clickOnValider()
@@ -106,13 +124,13 @@ void FenPreferences::clickOnValider()
         }
 
     }
-    if(mPathToLogbookDir!=ui->le_LogbookDir->text())
+    if(mPathToDefaultLogbookDir!=ui->le_LogbookDir->text())
     {
        QDir sDir=QDir(ui->le_LogbookDir->text());
        if(sDir.exists(ui->le_LogbookDir->text()))
        {
-           mPathToLogbookDir=ui->le_LogbookDir->text();
-           settings.setValue("PathToLogbookDir",mPathToLogbookDir);
+           mPathToDefaultLogbookDir=ui->le_LogbookDir->text();
+           settings.setValue("PathToDefaultLogbookDir",mPathToDefaultLogbookDir);
        }
     }
 
@@ -188,7 +206,7 @@ void FenPreferences::clickOnSelFicConfig()
 void FenPreferences::clickOnSelRepLogbook()
 {
     QString dirPath = QFileDialog::getExistingDirectory(this, tr("Répertoire du cahier de quart XML"),
-                               mPathToLogbookDir);
+                               mPathToDefaultLogbookDir);
 
     if(!dirPath.isEmpty())
         ui->le_LogbookDir->setText(dirPath);

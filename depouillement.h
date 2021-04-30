@@ -3,9 +3,16 @@
 
 #include <QWidget>
 #include <QGeoCoordinate>
+#include <QLayout>
+#include <QStackedLayout>
+
 #include "logbookmodel.h"
 #include "eventsettings.h"
 #include "fenmission.h"
+
+#include"anaprofils.h"
+#include "anaarchicont.h"
+
 namespace Ui {
 class Depouillement;
 }
@@ -67,6 +74,7 @@ private:
     QPair<int,int> findBornesProfilNumber(QString sEquipement);
     QString metersToNMString(double meters);
     void analyseData();
+    void gestionLayouts();
     void exportCSV();
     void exportHTML();
     void exportGPX();
@@ -83,6 +91,11 @@ private:
     fenMission::st_Mission mCurrentCruise;
     QString mRepExport;
     QSettings *mSettings;
+    QHBoxLayout* mLayoutProfils;
+    QHBoxLayout* mLayoutArcCont;
+    QList<AnaProfils*>mListProfilsWidgets;
+    QList<AnaArchiCont*>mListArchiWidgets;
+;
 };
 
 #endif // DEPOUILLEMENT_H

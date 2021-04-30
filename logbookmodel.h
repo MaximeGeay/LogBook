@@ -64,6 +64,7 @@ public slots:
     void setCurrentCruise(fenMission::st_Mission stCruise);
     fenMission::st_Mission getCurrentCruise();
     QString getCurrentLogbookPath();
+    void setNewLogbookPath(QString sPath);
 
 
 private:
@@ -74,6 +75,7 @@ private:
 
    // void addElement(stLogbookData uneLigne);
     void addDomElement(QDomElement element);
+    void addElementList(QList<QDomElement> elementList);
     bool majXML();
     bool creeXML(QString sPath);
     bool readXML(QString sPath);

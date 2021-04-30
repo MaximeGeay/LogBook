@@ -38,18 +38,7 @@ fenMission::~fenMission()
 fenMission::st_Mission fenMission::getCurrentCruise()
 {
     return mCurrentCruise;
-  /*  st_Mission currentCruise;
-    currentCruise.sNom=mSettings->value("Mission/Nom","").toString();
-    currentCruise.sZone=mSettings->value("Mission/Zone","").toString();
-    currentCruise.sNavire=mSettings->value("Mission/Navire","").toString();
-    currentCruise.sChefMission=mSettings->value("Mission/ChefMission","").toString();
-    currentCruise.dateDebut=mSettings->value("Mission/DateDebut","").toDate();
-    currentCruise.dateFin=mSettings->value("Mission/DateFin","").toDate();
-    currentCruise.sOperateurs=mSettings->value("Mission/Operateurs","").toString();
-    //currentCruise.listDataGroups=mSettings->value("Mission/DataGroups","").toStringList();
-    //currentCruise.sPath=mSettings->value("Mission/Path","").toString();
 
-    return currentCruise;*/
 }
 
 void fenMission::newCruise()
@@ -91,7 +80,6 @@ void fenMission::editCruise()
 QString fenMission::getCurrentCruiseName()
 {
     return mCurrentCruise.sNom;
-    //return mSettings->value("Mission/Nom","").toString();
 }
 
 void fenMission::setCurrentCruise(fenMission::st_Mission currentCruise)
@@ -104,6 +92,8 @@ void fenMission::setCurrentCruise(fenMission::st_Mission currentCruise)
     mSettings->setValue("Mission/DateDebut",currentCruise.dateDebut);
     mSettings->setValue("Mission/DateFin",currentCruise.dateFin);
     mSettings->setValue("Mission/Operateurs",currentCruise.sOperateurs);
+    emit newCruiseDetails(currentCruise);
+
 }
 
 
@@ -134,16 +124,25 @@ void fenMission::valider()
     mSettings->setValue("Mission/DateFin",currentCruise.dateFin);
     mSettings->setValue("Mission/Operateurs",currentCruise.sOperateurs);
 
+    mCurrentCruise=currentCruise;
+
+
     if(mNewCruise)
     {      
-        emit newCruiseSet(currentCruise.sNom);
+
+        emit newCruiseSet(currentCruise.sNom);       
+        mNewCruise=false;
+
+    }
+    else
+    {
+        emit newCruiseDetails(currentCruise);
+
 
     }
 
-    emit newCruiseDetails(currentCruise);
-    emit editingFinished();
 
-    mCurrentCruise=currentCruise;
+
 
     this->close();
 }
@@ -168,6 +167,7 @@ void fenMission::setAdmin(int nAdm)
 
 
 }
+
 
 
 

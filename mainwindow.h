@@ -30,8 +30,8 @@ public:
 private slots:
     void readError(QString sError);
     void initEvents();
-    void setNewLogbookName(QString sMission);
-    void setCurrentLogbook(QString sLogbookName);
+    void setNewLogbook(QString sMission);
+    void setCurrentLogbook(QString sDir, QString sLogbookName);
     void initLogBook(QString sPath);
     void initCustomTable();
     void hideColumn();

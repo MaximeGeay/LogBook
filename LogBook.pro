@@ -9,6 +9,8 @@ CONFIG += c++11
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    anaarchicont.cpp \
+    anaprofils.cpp \
     customtablemodel.cpp \
     depouillement.cpp \
     eventdetails.cpp \
@@ -24,6 +26,8 @@ SOURCES += \
     udpdata.cpp
 
 HEADERS += \
+    anaarchicont.h \
+    anaprofils.h \
     customtablemodel.h \
     depouillement.h \
     eventdetails.h \
@@ -38,6 +42,8 @@ HEADERS += \
     udpdata.h
 
 FORMS += \
+    anaarchicont.ui \
+    anaprofils.ui \
     depouillement.ui \
     eventdetails.ui \
     eventmanager.ui \

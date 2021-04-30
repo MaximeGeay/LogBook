@@ -43,7 +43,6 @@ private slots:
     void setAdmin(int nAdm);
 
 signals:
-    void editingFinished();
     void newCruiseSet(QString sNewCruise);
     void newCruiseDetails(st_Mission);
 

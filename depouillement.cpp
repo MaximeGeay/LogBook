@@ -1,8 +1,9 @@
 #include <QTableWidget>
-#include <QBoxLayout>
+//#include <QBoxLayout>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDesktopServices>
+
 #include "depouillement.h"
 #include "ui_depouillement.h"
 
@@ -15,9 +16,16 @@ Depouillement::Depouillement(QWidget *parent) :
     mSettings=new QSettings();
     mRepExport=mSettings->value("ExportPath",QCoreApplication::applicationDirPath()).toString();
 
+    mLayoutProfils=new QHBoxLayout;
+    mLayoutArcCont=new QHBoxLayout;
+
+    ui->gb_Profils->setLayout(mLayoutProfils);
+    ui->gb_ArcCont->setLayout(mLayoutArcCont);
+
     QObject::connect(ui->btn_details,&QPushButton::clicked,this,&Depouillement::construitTableProfil);
     QObject::connect(ui->btn_details,&QPushButton::clicked,this,&Depouillement::construitTableArcCont);
     QObject::connect(ui->btn_export,&QPushButton::clicked,this,&Depouillement::clickOnExport);
+    QObject::connect(ui->btn_Refresh,&QPushButton::clicked,this,&Depouillement::process);
 }
 
 Depouillement::~Depouillement()
@@ -47,7 +55,7 @@ void Depouillement::setCurrentCruise(fenMission::st_Mission sCruise)
     ui->l_ChefMission->setText(QString("Chef(fe) de mission: %1").arg(mCurrentCruise.sChefMission));
     ui->l_Navire->setText(mCurrentCruise.sNavire);
     ui->l_Zone->setText(QString("Zone: %1").arg(mCurrentCruise.sZone));
-    ui->l_Operateurs->setText(QString("Opérateurs: %1").arg(mCurrentCruise.sOperateurs));
+    ui->l_Operateurs->setText(QString("Opérateurs(tices): %1").arg(mCurrentCruise.sOperateurs));
 
 
 }
@@ -228,7 +236,6 @@ void Depouillement::showProfils()
         stProfil unProfil;
         while (itProfil.hasNext()) {
             unProfil=itProfil.next();
-            qDebug()<<unProfil.eventDebut.equipement<<unProfil.eventDebut.profil<<unProfil.eventDebut.dateheure<<unProfil.eventFin.dateheure<<unProfil.eventDebut.position<<unProfil.eventFin.position<<unProfil.duree<<unProfil.distance;
 
         }
 
@@ -395,6 +402,29 @@ void Depouillement::analyseData()
 
     mListResumeArcCont.clear();
     mListResumeProfils.clear();
+    QListIterator<AnaProfils*>itWidget(mListProfilsWidgets);
+    int i=0;
+    while(itWidget.hasNext())
+    {
+        mLayoutProfils->removeWidget(itWidget.next());
+        delete mListProfilsWidgets[i];
+        i++;
+
+    }
+    mListProfilsWidgets.clear();
+
+    QListIterator<AnaArchiCont*>itWiArc(mListArchiWidgets);
+    i=0;
+    while(itWiArc.hasNext())
+    {
+        mLayoutArcCont->removeWidget(itWiArc.next());
+        delete mListArchiWidgets[i];
+        i++;
+
+    }
+    mListProfilsWidgets.clear();
+    mListArchiWidgets.clear();
+
     QListIterator<QList<stProfil>>itGlobal(mListProfils);
     QList<stProfil>uneListe;
 
@@ -402,7 +432,6 @@ void Depouillement::analyseData()
     {
         uneListe=itGlobal.next();
         stResumeProfil unResume;
-        // unResume.dureeTotale=QDateTime::fromString(QString("01/01/2000 00:00:00"),"dd/MM/yyyy hh:mm:ss");
         bool bFirst=true;
         QListIterator<stProfil>itProfil(uneListe);
         stProfil unProfil;
@@ -422,7 +451,6 @@ void Depouillement::analyseData()
 
         }
 
-        //   qDebug()<<"unResume"<<unResume.sEquipement<<unResume.nTotalProfils<<unResume.distanceTotale<<QString("%1j %2").arg(QString::number(unResume.dureeTotale.toString("dd").toInt()-1)).arg(unResume.dureeTotale.toString("hh:mm:ss"))<<unResume.dureeTotale;
 
         mListResumeProfils.append(unResume);
 
@@ -438,7 +466,6 @@ void Depouillement::analyseData()
     {
         uneListeA=itGlobArc.next();
         stResumeArcCont unResume;
-        //  unResume.dureeTotale=QDateTime::fromString(QString("01/01/2000 00:00:00"),"dd/MM/yyyy hh:mm:ss");
 
         QListIterator<stArcCont>itArc(uneListeA);
         stArcCont unArchi;
@@ -464,67 +491,66 @@ void Depouillement::analyseData()
     {
         QListIterator<stResumeProfil>itResPro(mListResumeProfils);
         stResumeProfil unResume;
-        QHBoxLayout* layoutProfils=new QHBoxLayout;
+
         while (itResPro.hasNext()) {
             unResume=itResPro.next();
-            QVBoxLayout* layoutDetails=new QVBoxLayout;
-            QGroupBox* gbProfilName=new QGroupBox;
-            QLabel* lDuree=new QLabel;
-            QLabel* lDistance=new QLabel;
-            QLabel* lNumProfil=new QLabel;
-            gbProfilName->setTitle(unResume.sEquipement);
 
+            AnaProfils* gbProfil=new AnaProfils();
 
-            lDuree->setText(QString("Duree totale d'acquisition %1: %2").arg(unResume.sEquipement,secToString(unResume.dureeTotale)));
-            lNumProfil->setText(QString("Nombre de profil: %1").arg(unResume.nTotalProfils));
-            lDistance->setText(QString("Longueur totale des profils: %1 milles").arg(QString::number(unResume.distanceTotale,'f',1)));
-
-            layoutDetails->addWidget(lDuree);
-            layoutDetails->addWidget(lNumProfil);
-            layoutDetails->addWidget(lDistance);
-
-            gbProfilName->setLayout(layoutDetails);
-            layoutProfils->addWidget(gbProfilName);
-
-
-
+            gbProfil->setName(unResume.sEquipement);
+            gbProfil->setDuree(QString("Duree totale d'acquisition %1: %2").arg(unResume.sEquipement,secToString(unResume.dureeTotale)));
+            gbProfil->setNombre(QString("Nombre de profil: %1").arg(unResume.nTotalProfils));
+            gbProfil->setDistance(QString("Longueur totale des profils: %1 milles").arg(QString::number(unResume.distanceTotale,'f',1)));
+            mListProfilsWidgets.append(gbProfil);
 
         }
-        ui->gb_Profils->setLayout(layoutProfils);
+
+
     }
 
     if(mListResumeArcCont.size()>0)
     {
         QListIterator<stResumeArcCont>itResArc(mListResumeArcCont);
         stResumeArcCont unResume;
-        QHBoxLayout* layoutArc=new QHBoxLayout;
         while (itResArc.hasNext()) {
             unResume=itResArc.next();
-            QVBoxLayout* layoutDetails=new QVBoxLayout;
-            QGroupBox* gbArcName=new QGroupBox;
-            QLabel* lDuree=new QLabel;
 
-            gbArcName->setTitle(unResume.sEquipement);
-            QString sDuree;
-
-            lDuree->setText(QString("Duree totale d'acquisition %1: %2").arg(unResume.sEquipement,secToString(unResume.dureeTotale)));
-
-
-            layoutDetails->addWidget(lDuree);
-
-
-            gbArcName->setLayout(layoutDetails);
-            layoutArc->addWidget(gbArcName);
-
-
-
+            AnaArchiCont* gbArcCont=new AnaArchiCont();
+            gbArcCont->setName(unResume.sEquipement);
+            gbArcCont->setDuree(QString("Duree totale d'acquisition %1: %2").arg(unResume.sEquipement,secToString(unResume.dureeTotale)));
+            mListArchiWidgets.append(gbArcCont);
 
         }
-        ui->gb_ArcCont->setLayout(layoutArc);
+
 
     }
 
+    gestionLayouts();
 
+
+}
+
+void Depouillement::gestionLayouts()
+{
+
+
+    QListIterator<AnaProfils*>it(mListProfilsWidgets);
+    while (it.hasNext()) {
+
+        mLayoutProfils->addWidget(it.next());
+
+    }
+
+    ui->gb_Profils->setLayout(mLayoutProfils);
+
+    QListIterator<AnaArchiCont*>it2(mListArchiWidgets);
+    while (it2.hasNext()) {
+
+        mLayoutArcCont->addWidget(it2.next());
+
+    }
+
+    ui->gb_ArcCont->setLayout(mLayoutArcCont);
 
 
 }
@@ -537,9 +563,11 @@ void Depouillement::exportCSV()
     QString sUnLog;
     QString sUnSip;
     QString sUnEvent;
-    QFile ficLogbook (QString("%1/Logbook_%2.csv").arg(mRepExport,mCurrentCruise.sNom));
-    QFile ficSippican(QString("%1/Sippican_%2.csv").arg(mRepExport,mCurrentCruise.sNom));
-    QFile ficEvenement(QString("%1/Evements_%2.csv").arg(mRepExport,mCurrentCruise.sNom));
+    QDir dir;
+    dir.mkpath(QString("%1/CSV").arg(mRepExport));
+    QFile ficLogbook (QString("%1/CSV/Logbook_%2.csv").arg(mRepExport,mCurrentCruise.sNom));
+    QFile ficSippican(QString("%1/CSV/Sippican_%2.csv").arg(mRepExport,mCurrentCruise.sNom));
+    QFile ficEvenement(QString("%1/CSV/Evenements_%2.csv").arg(mRepExport,mCurrentCruise.sNom));
 
     if(!ficLogbook.open(QIODevice::WriteOnly))
     {
@@ -558,12 +586,15 @@ void Depouillement::exportCSV()
     }
 
     QTextStream fluxLogBook(&ficLogbook);
+    fluxLogBook.setCodec("UTF-8");
     fluxLogBook<<"Date/Heure;Equipement;Titre;Position;COG;SOG;Sonde;Commentaires;\r\n";
 
     QTextStream fluxSippican(&ficSippican);
+    fluxSippican.setCodec("UTF-8");
     fluxSippican<<QString("Date/Heure;Position;COG;SOG;Sonde;Célérité à 3m;Célérimètre;Célérité SBE;Salinité;Température;Type de Sonde;Fichier ASVP;Fichier SIS;Heure de chargement;Commentaires;\r\n").toUtf8();
 
     QTextStream fluxEvent(&ficEvenement);
+    fluxEvent.setCodec("UTF-8");
     fluxEvent<<"Date/Heure;Titre;Position;COG;SOG;Sonde;Commentaires;\r\n";
 
 
@@ -604,7 +635,7 @@ void Depouillement::exportCSV()
         uneListe=itGlobal.next();
 
         QString sEq=uneListe.first().eventDebut.equipement.remove(" ");
-        QFile ficProfil(QString("%1/Profil_%2_%3.csv").arg(mRepExport,sEq,mCurrentCruise.sNom));
+        QFile ficProfil(QString("%1/CSV/Profil_%2_%3.csv").arg(mRepExport,sEq,mCurrentCruise.sNom));
         if(!ficProfil.open(QIODevice::WriteOnly))
         {
             qDebug()<<QString("Erreur d'ouverture Profil_%1.csv").arg(sEq);
@@ -612,6 +643,7 @@ void Depouillement::exportCSV()
         }
 
         QTextStream fluxProfil(&ficProfil);
+        fluxProfil.setCodec("UTF-8");
 
         fluxProfil<<QString("N° de profil;Fichier début;Fichier fin;Heure début;Heure Fin;Position début;Position fin;Durée;Distance(NM)\r\n").toUtf8();
         QString sPro;
@@ -651,7 +683,7 @@ void Depouillement::exportCSV()
         uneListeAr=itGlobalAr.next();
 
         QString sEq=uneListeAr.first().eventDebut.equipement.remove(" ");
-        QFile ficArchi(QString("%1/Archivage_%2_%3.csv").arg(mRepExport,sEq,mCurrentCruise.sNom));
+        QFile ficArchi(QString("%1/CSV/Archivage_%2_%3.csv").arg(mRepExport,sEq,mCurrentCruise.sNom));
         if(!ficArchi.open(QIODevice::WriteOnly))
         {
             qDebug()<<QString("Erreur d'ouverture Archivage_%1.csv").arg(sEq);
@@ -659,6 +691,7 @@ void Depouillement::exportCSV()
         }
 
         QTextStream fluxArchi(&ficArchi);
+        fluxArchi.setCodec("UTF-8");
 
         fluxArchi<<QString("Heure début;Heure Fin;Position début;Position fin;Durée\r\n").toUtf8();
 
@@ -702,9 +735,11 @@ void Depouillement::exportCSV()
 
 void Depouillement::exportHTML()
 {
+    QDir dir;
+    dir.mkpath(QString("%1/HTML").arg(mRepExport));
     QFile ficReport(QString("%1/Logbook_%2.html").arg(mRepExport,mCurrentCruise.sNom));
-    QFile ficSippican(QString("%1/Sippican_%2.html").arg(mRepExport,mCurrentCruise.sNom));
-    QFile ficEvent(QString("%1/Evenements_%2.html").arg(mRepExport,mCurrentCruise.sNom));
+    QFile ficSippican(QString("%1/HTML/Sippican_%2.html").arg(mRepExport,mCurrentCruise.sNom));
+    QFile ficEvent(QString("%1/HTML/Evenements_%2.html").arg(mRepExport,mCurrentCruise.sNom));
 
     if(!ficReport.open(QIODevice::WriteOnly))
     {
@@ -726,8 +761,11 @@ void Depouillement::exportHTML()
     }
 
     QTextStream fluxReport(&ficReport);
+    fluxReport.setCodec("UTF-8");
     QTextStream fluxSippican(&ficSippican);
+    fluxSippican.setCodec("UTF-8");
     QTextStream fluxEvents(&ficEvent);
+    fluxEvents.setCodec("UTF-8");
 
 
     fluxReport<<QString("<HTML><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><HEAD><title>Résumé de la campagne "
@@ -892,7 +930,7 @@ void Depouillement::exportHTML()
         uneListe=itGlobal.next();
 
         QString sEq=uneListe.first().eventDebut.equipement.remove(" ");
-        QFile ficProfil(QString("%1/Profils_%2_%3.html").arg(mRepExport,sEq,mCurrentCruise.sNom));
+        QFile ficProfil(QString("%1/HTML/Profils_%2_%3.html").arg(mRepExport,sEq,mCurrentCruise.sNom));
         if(!ficProfil.open(QIODevice::WriteOnly))
         {
             qDebug()<<QString("Erreur d'ouverture Profils_%1.html").arg(sEq);
@@ -900,6 +938,7 @@ void Depouillement::exportHTML()
         }
 
         QTextStream fluxProfil(&ficProfil);
+        fluxProfil.setCodec("UTF-8");
 
         //fluxProfil<<QString("N° de profil;Fichier début;Fichier fin;Heure début;Heure Fin;Position début;Position fin;Durée;Distance(NM)\r\n").toUtf8();
 
@@ -965,7 +1004,7 @@ void Depouillement::exportHTML()
         uneListeAr=itGlobalAr.next();
 
         QString sEq=uneListeAr.first().eventDebut.equipement.remove(" ");
-        QFile ficArchi(QString("%1/Archivage_%2_%3.html").arg(mRepExport,sEq,mCurrentCruise.sNom));
+        QFile ficArchi(QString("%1/HTML/Archivage_%2_%3.html").arg(mRepExport,sEq,mCurrentCruise.sNom));
         if(!ficArchi.open(QIODevice::WriteOnly))
         {
             qDebug()<<QString("Erreur d'ouverture Archivage_%1.html").arg(sEq);
@@ -973,6 +1012,7 @@ void Depouillement::exportHTML()
         }
 
         QTextStream fluxArchi(&ficArchi);
+        fluxArchi.setCodec("UTF-8");
 
         fluxArchi<<QString("<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><head><title>Tableau Archivage </title>"
                            "<style>table {margin: 5px;}td {background-color: #e0e0e0;padding: 2px 5px;font-family: 'Microsoft Sans Serif';border-radius: 3px;}pre {font-family: 'Microsoft Sans Serif';}tr.quarter td {background-color: #277db5;color: white;}.header {background-color: #202020;color: white;font-weight: bold;text-align: center;}tr.event:nth-child(2n+1) td {background-color: #b0b0b0;}tr.critialEvent td {background-color: red;}tr.critialEvent td:last-child {text-align: center;}tr.highLevelEvent td {background-color: #97F786;}tr.navErrorEvent td {background-color: yellow; } @media print {body {-webkit-print-color-adjust: exact;}}"
@@ -1026,7 +1066,9 @@ void Depouillement::exportHTML()
 
 void Depouillement::exportGPX()
 {
-    QFile ficGPX (QString("%1/%2.gpx").arg(mRepExport,mCurrentCruise.sNom));
+    QDir dir;
+    dir.mkpath(QString("%1/GPX").arg(mRepExport));
+    QFile ficGPX (QString("%1/GPX/%2.gpx").arg(mRepExport,mCurrentCruise.sNom));
     if(!ficGPX.open(QIODevice::WriteOnly))
     {
         qDebug()<<QString("Erreur d'ouverture %1").arg(QString("%1/%2.gpx").arg(mRepExport,mCurrentCruise.sNom));
@@ -1035,6 +1077,7 @@ void Depouillement::exportGPX()
 
     QDomDocument *doc=new QDomDocument("DomDocument"); // creation du document
     QTextStream out(&ficGPX);
+    out.setCodec("UTF-8");
     QDomElement gpx =doc->createElement("gpx"); // premiere balise du fichier gpx
   //xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"
 //xmlns:opencpn="http://www.opencpn.org">
@@ -1047,11 +1090,7 @@ void Depouillement::exportGPX()
     doc->appendChild(gpx);
 
 
-    /*
-         QString version ="version="1.0"";
-         creator="Scampi"
-         les parametre version et creator sont indispensables
-        */
+
 
     // root node
     QDomElement wpt = doc->createElement("wpt");
@@ -1230,58 +1269,6 @@ void Depouillement::exportGPX()
 
 
 
-/*
-    gpx.appendChild(trk);// deuxieme balise Documents
-    QDomElement trkseg = doc->createElement("trkseg");
-
-    trk.appendChild(trkseg);
-
-    int i=0;
-    while(!in.atEnd())  // temps que le fichier source n'est pas lu en entier
-    {
-        sLigne= in.readLine();
-
-        // On saute la ligne d'entête
-        // "DATE;HEURE;LATITUDE;LONGITUDE;SOURCE;FORMAT;SUPPORT;QUALITE;IMAGE;CAP;GITE;ASSIETTE;IMMERSION;ALTITUDE;ANGLE_PAN;ANGLE_TILT;CAP_3CCD;ASS_3CCD;ZOOM;IRIS;FOCUS;CODE;IDENTIFIANT;COMMENTAIRE;\r\n");
-
-        if(i>0)
-            // PlamarkNumerosPhoto
-        {
-
-            sDateHeure=sLigne.section(";",0,1);
-            sLat=sLigne.section(";",2,2);
-            sLong=sLigne.section(";",3,3);
-            sNomPhoto=sLigne.section(";",8,8);
-            sCap=sLigne.section(";",9,9);
-            sImmersion="-"+sLigne.section(";",12,12);
-
-            dateTime=QDateTime::fromString(sDateHeure,"dd/MM/yyyy;hh:mm:ss");
-
-
-            gpxTime=dateTime.toString("yyyy-MM-ddThh:mm:ssZ");
-
-            QDomElement trkpt = doc->createElement("trkpt");
-            trkseg.appendChild(trkpt);
-            trkpt.setAttribute("lat",sLat);
-            trkpt.setAttribute("lon",sLong);
-            QDomElement desc =doc->createElement("desc");
-            trkpt.appendChild(desc);
-            QDomText d=doc->createTextNode(sNomPhoto);
-            desc.appendChild(d);
-            QDomElement ele=doc->createElement("ele");
-            trkpt.appendChild(ele);
-            QDomText e =doc->createTextNode(sImmersion);
-            ele.appendChild(e);
-            QDomElement time=doc->createElement("time");
-            trkpt.appendChild(time);
-            QDomText t =doc->createTextNode(gpxTime);
-            time.appendChild(t);
-
-        }
-        //trkpt.appendChild(Point);
-
-        i++;
-    }*/
 
 
     QString write_Doc=doc->toString();

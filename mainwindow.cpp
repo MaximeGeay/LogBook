@@ -5,7 +5,7 @@
 #include "ui_mainwindow.h"
 
 
-#define version "LogBook 0.2"
+#define version "LogBook 0.3"
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
@@ -68,7 +68,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(mFenPref,&FenPreferences::xmlError,this,&MainWindow::readError);
     QObject::connect(mNavData,&NavData::errorString,this,&MainWindow::readError);
     QObject::connect(mLogBookModel,&LogbookModel::xmlError,this,&MainWindow::readError);
-    QObject::connect(mFenMission,&fenMission::newCruiseSet,this,&MainWindow::setNewLogbookName);
+    QObject::connect(mFenMission,&fenMission::newCruiseSet,this,&MainWindow::setNewLogbook);
     QObject::connect(mFenMission,&fenMission::newCruiseDetails,mLogBookModel,&LogbookModel::setCurrentCruise);
     QObject::connect(mFenMission,&fenMission::newCruiseDetails,mDepouillement,&Depouillement::setCurrentCruise);
     QObject::connect(ui->tableMain,&QTableView::clicked,mLogBookModel,&LogbookModel::selectEvent);
@@ -90,7 +90,16 @@ MainWindow::MainWindow(QWidget *parent)
 
     initEvents();
     mNavData->initCom();
-    setNewLogbookName(mFenMission->getCurrentCruiseName());
+
+    QString sMission=mFenMission->getCurrentCruiseName();
+    if(sMission=="")
+    {
+        QMessageBox::warning(this,"Aucun cahier de quart","Aucun cahier de quart n'est configuré,\n"
+                                                          "Veuillez créer une campagne");
+        mFenMission->newCruise();
+    }
+    QString sLogbookName=QString("Logbook_%1.xml").arg(sMission);
+    setCurrentLogbook(mFenPref->getCurrentLogbookDir(),sLogbookName);
     ui->gb_Details->setVisible(false);
     mDepouillement->show();
 
@@ -143,7 +152,6 @@ void MainWindow::initEvents()
         QObject::connect(manager,&EventManager::addEvent,mLogBookModel,&LogbookModel::addEvent);
         QObject::connect(mEventDetails,&EventDetails::modifyEvent,mLogBookModel,&LogbookModel::modifyEvent);
         QObject::connect(mEventDetails,&EventDetails::removeEvent,mLogBookModel,&LogbookModel::removeEvent);
-       // QObject::connect(mEventDetails,&EventDetails::addEvent,mLogBookModel,&LogbookModel::addEvent);
         QObject::connect(mLogBookModel,&LogbookModel::lastEventRead,manager,&EventManager::majLastEvent);
 
         mButtonList.append(btn_Manager);
@@ -152,24 +160,22 @@ void MainWindow::initEvents()
 
 }
 
-void MainWindow::setNewLogbookName(QString sMission)
+void MainWindow::setNewLogbook(QString sMission)
 {
-    if(sMission=="")
-    {
-        QMessageBox::warning(this,"Aucun cahier de quart","Aucun cahier de quart n'est configuré,\n"
-                                                          "Veuillez créer une campagne");
-        mFenMission->newCruise();
-    }
     QString sLogbookName=QString("Logbook_%1.xml").arg(sMission);
-    setCurrentLogbook(sLogbookName);
+    QString sDir=mFenPref->getDefaultLogbookDir();
+    mFenPref->setCurrentLogbookDir(sDir);
+    mLogBookModel->setNewLogbookPath(QString("%1/%2").arg(sDir,sLogbookName));
+    mLogBookModel->setCurrentCruise(mFenMission->getCurrentCruise());
+    initLogBook(QString("%1/%2").arg(sDir,sLogbookName));
+
+
 }
 
-void MainWindow::setCurrentLogbook(QString sLogbookName)
+void MainWindow::setCurrentLogbook(QString sDir,QString sLogbookName)
 {
-    QString sDir=mFenPref->getLogbookDir();
+
     QString sLogbookPath=QString("%1/%2").arg(sDir,sLogbookName);
-
-
     initLogBook(sLogbookPath);
 
 }
@@ -198,6 +204,7 @@ void MainWindow::initCustomTable()
     for(i=10;i<19;i++)
         ui->table_Profils->setColumnHidden(i,true);
 
+    ui->table_Profils->setColumnWidth(1,130);
     ui->table_Profils->setColumnWidth(2,100);
     ui->table_Profils->setColumnWidth(4,180);
     ui->table_Profils->setColumnWidth(5,80);
@@ -214,6 +221,7 @@ void MainWindow::initCustomTable()
     ui->table_Sippican->setColumnHidden(9,true);
     ui->table_Sippican->scrollToBottom();
 
+    ui->table_Sippican->setColumnWidth(1,130);
     ui->table_Sippican->setColumnWidth(2,100);
     ui->table_Sippican->setColumnWidth(4,180);
     ui->table_Sippican->setColumnWidth(5,80);
@@ -233,6 +241,7 @@ void MainWindow::initCustomTable()
     ui->table_EvntPonct->setColumnHidden(0,true);
     for(i=8;i<19;i++)
             ui->table_EvntPonct->setColumnHidden(i,true);
+    ui->table_EvntPonct->setColumnWidth(1,130);
     ui->table_EvntPonct->setColumnWidth(2,100);
     ui->table_EvntPonct->setColumnWidth(4,180);
     ui->table_EvntPonct->setColumnWidth(5,80);
@@ -245,7 +254,8 @@ void MainWindow::initCustomTable()
     ui->table_ArcCont->setColumnHidden(0,true);
     for(i=8;i<19;i++)
             ui->table_ArcCont->setColumnHidden(i,true);
-    ui->table_ArcCont->setColumnWidth(2,100);
+    ui->table_ArcCont->setColumnWidth(1,130);
+    ui->table_ArcCont->setColumnWidth(2,120);
     ui->table_ArcCont->setColumnWidth(4,180);
     ui->table_ArcCont->setColumnWidth(5,80);
     ui->table_ArcCont->setColumnWidth(6,80);
@@ -256,6 +266,7 @@ void MainWindow::initCustomTable()
 void MainWindow::hideColumn()
 {
     ui->tableMain->setColumnHidden(0,true);
+    ui->tableMain->setColumnWidth(1,130);
     ui->tableMain->scrollToBottom();
 
 }
@@ -277,22 +288,26 @@ void MainWindow::showDetails()
 
 void MainWindow::clickOnNewLogbook()
 {
-    mFenMission->setCurrentCruise(mLogBookModel->getCurrentCruise());
+    //mFenMission->setCurrentCruise(mLogBookModel->getCurrentCruise());
     mFenMission->newCruise();
 }
 
 void MainWindow::clickOnOpenLogbook()
 {
-    QString sPath=QFileDialog::getOpenFileName(this,"Sélectionner un cahier de quart",mFenPref->getLogbookDir(),"*.xml");
+    QString sPath=QFileDialog::getOpenFileName(this,"Sélectionner un cahier de quart",mFenPref->getCurrentLogbookDir(),"*.xml");
     if(!sPath.isEmpty())
     {
+        QString sDirPath;
+        int n=sPath.count("/");
+        sDirPath=sPath.section("/",0,n-1);
+        mFenPref->setCurrentLogbookDir(sDirPath);
         initLogBook(sPath);
     }
 }
 
 void MainWindow::clickOnSaveLogbook()
 {
-    QString sPath=QFileDialog::getSaveFileName(this,"Enregistrer le cahier de quart sous",mFenPref->getLogbookDir(),"*.xml");
+    QString sPath=QFileDialog::getSaveFileName(this,"Enregistrer le cahier de quart sous",mFenPref->getDefaultLogbookDir(),"*.xml");
     if(!sPath.isEmpty())
     {
         QFile::copy(mLogBookModel->getCurrentLogbookPath(),sPath);

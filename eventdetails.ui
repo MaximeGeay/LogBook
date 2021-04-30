@@ -106,7 +106,7 @@
    <item row="5" column="0" colspan="5">
     <widget class="QStackedWidget" name="sw_Sip_Pro">
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page_Vide"/>
      <widget class="QWidget" name="page_Profil">
@@ -118,6 +118,9 @@
            <width>80</width>
            <height>16777215</height>
           </size>
+         </property>
+         <property name="maximum">
+          <number>1000</number>
          </property>
         </widget>
        </item>
