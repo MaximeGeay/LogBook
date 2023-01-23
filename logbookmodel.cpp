@@ -172,8 +172,7 @@ void LogbookModel::addDomElement(QDomElement element)
     }
 
     QTextStream stream(&fichier);
-    stream.setCodec("UTF-8");
-
+    stream.setEncoding(QStringConverter::Utf8);
     stream<<write_doc;
 
     fichier.close();
@@ -210,7 +209,7 @@ void LogbookModel::addElementList(QList<QDomElement> elementList)
     }
 
     QTextStream stream(&fichier);
-    stream.setCodec("UTF-8");
+    stream.setEncoding(QStringConverter::Utf8);
 
     stream<<write_doc;
 

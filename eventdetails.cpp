@@ -153,6 +153,10 @@ void EventDetails::clickOnValider()
    mCurrentEvent.dateheureSIS=ui->dt_ChargeSIS->dateTime();
    mCurrentEvent.sisLoaded=ui->cb_ChargeSIS->isChecked();
    mCurrentEvent.refCelerite=ui->cb_RefCelerite->currentIndex();
+   mCurrentEvent.position=stringToPos(ui->le_Position->text());
+
+
+
 
     mValidation=true;
    if(mAjout)

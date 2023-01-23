@@ -586,15 +586,15 @@ void Depouillement::exportCSV()
     }
 
     QTextStream fluxLogBook(&ficLogbook);
-    fluxLogBook.setCodec("UTF-8");
+    fluxLogBook.setEncoding(QStringConverter::Utf8);
     fluxLogBook<<"Date/Heure;Equipement;Titre;Position;COG;SOG;Sonde;Commentaires;\r\n";
 
     QTextStream fluxSippican(&ficSippican);
-    fluxSippican.setCodec("UTF-8");
+    fluxSippican.setEncoding(QStringConverter::Utf8);
     fluxSippican<<QString("Date/Heure;Position;COG;SOG;Sonde;Célérité à 3m;Célérimètre;Célérité SBE;Salinité;Température;Type de Sonde;Fichier ASVP;Fichier SIS;Heure de chargement;Commentaires;\r\n").toUtf8();
 
     QTextStream fluxEvent(&ficEvenement);
-    fluxEvent.setCodec("UTF-8");
+    fluxEvent.setEncoding(QStringConverter::Utf8);
     fluxEvent<<"Date/Heure;Titre;Position;COG;SOG;Sonde;Commentaires;\r\n";
 
 
@@ -643,7 +643,7 @@ void Depouillement::exportCSV()
         }
 
         QTextStream fluxProfil(&ficProfil);
-        fluxProfil.setCodec("UTF-8");
+        fluxProfil.setEncoding(QStringConverter::Utf8);
 
         fluxProfil<<QString("N° de profil;Fichier début;Fichier fin;Heure début;Heure Fin;Position début;Position fin;Durée;Distance(NM)\r\n").toUtf8();
         QString sPro;
@@ -691,7 +691,7 @@ void Depouillement::exportCSV()
         }
 
         QTextStream fluxArchi(&ficArchi);
-        fluxArchi.setCodec("UTF-8");
+        fluxArchi.setEncoding(QStringConverter::Utf8);
 
         fluxArchi<<QString("Heure début;Heure Fin;Position début;Position fin;Durée\r\n").toUtf8();
 
@@ -761,11 +761,11 @@ void Depouillement::exportHTML()
     }
 
     QTextStream fluxReport(&ficReport);
-    fluxReport.setCodec("UTF-8");
+    fluxReport.setEncoding(QStringConverter::Utf8);
     QTextStream fluxSippican(&ficSippican);
-    fluxSippican.setCodec("UTF-8");
+    fluxSippican.setEncoding(QStringConverter::Utf8);
     QTextStream fluxEvents(&ficEvent);
-    fluxEvents.setCodec("UTF-8");
+    fluxEvents.setEncoding(QStringConverter::Utf8);
 
 
     fluxReport<<QString("<HTML><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><HEAD><title>Résumé de la campagne "
@@ -938,7 +938,7 @@ void Depouillement::exportHTML()
         }
 
         QTextStream fluxProfil(&ficProfil);
-        fluxProfil.setCodec("UTF-8");
+        fluxProfil.setEncoding(QStringConverter::Utf8);
 
         //fluxProfil<<QString("N° de profil;Fichier début;Fichier fin;Heure début;Heure Fin;Position début;Position fin;Durée;Distance(NM)\r\n").toUtf8();
 
@@ -1012,7 +1012,7 @@ void Depouillement::exportHTML()
         }
 
         QTextStream fluxArchi(&ficArchi);
-        fluxArchi.setCodec("UTF-8");
+        fluxArchi.setEncoding(QStringConverter::Utf8);
 
         fluxArchi<<QString("<html><meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\"><head><title>Tableau Archivage </title>"
                            "<style>table {margin: 5px;}td {background-color: #e0e0e0;padding: 2px 5px;font-family: 'Microsoft Sans Serif';border-radius: 3px;}pre {font-family: 'Microsoft Sans Serif';}tr.quarter td {background-color: #277db5;color: white;}.header {background-color: #202020;color: white;font-weight: bold;text-align: center;}tr.event:nth-child(2n+1) td {background-color: #b0b0b0;}tr.critialEvent td {background-color: red;}tr.critialEvent td:last-child {text-align: center;}tr.highLevelEvent td {background-color: #97F786;}tr.navErrorEvent td {background-color: yellow; } @media print {body {-webkit-print-color-adjust: exact;}}"
@@ -1077,7 +1077,7 @@ void Depouillement::exportGPX()
 
     QDomDocument *doc=new QDomDocument("DomDocument"); // creation du document
     QTextStream out(&ficGPX);
-    out.setCodec("UTF-8");
+    out.setEncoding(QStringConverter::Utf8);
     QDomElement gpx =doc->createElement("gpx"); // premiere balise du fichier gpx
   //xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd"
 //xmlns:opencpn="http://www.opencpn.org">
