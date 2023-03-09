@@ -156,6 +156,43 @@ void NavData::readData(QString sTrame)
          }
 
 
+        if(sTrame.section(",",0,0).contains("MES")) //trames TECHSAS
+        {
+            //$CMMES,date,heure,SBE21, 0,0000.00,conductivité,T° prise d’eau,salinité,anomalie de densité,célérité,T° cuve
+            //$CMMES,12/02/23,06:27:44.366,SBE21, 0,0000.00,04.012,011.561,035.320,026.921,1495.70,011.789
+            if(sTrame.section(",",3,3)=="SBE21" || sTrame.section(",",3,3)=="THSAL")
+            {
+                uneSBE.conductivite=sTrame.section(",",6,6).toDouble();
+                uneSBE.tempExt=sTrame.section(",",7,7).toDouble();
+                uneSBE.salinite=sTrame.section(",",8,8).toDouble();
+                uneSBE.celerite=sTrame.section(",",10,10).toDouble();
+                uneSBE.tempCuve=sTrame.section(",",11,11).toDouble();
+                uneSBE.dispo=true;
+                ui->l_salinite->setText(QString("Salinité: %1 psu").arg(uneSBE.salinite));
+                ui->l_CelSBE->setText(QString("Célérité SBE: %1 m/s").arg(uneSBE.celerite));
+                ui->l_Temperature->setText(QString("Température: %1 °C").arg(uneSBE.tempExt));
+                mLastSBE=uneSBE;
+                emit sbeReceived(mLastSBE);
+
+            }
+
+            if(sTrame.section(",",3,3)=="SNDSP"|| sTrame.section(",",3,3)=="SPEED")
+            {
+                double dCel=sTrame.section(",",5,5).toDouble();
+                if(dCel>1400&&dCel<1600)
+                {
+                    mLastCelerite=dCel;
+                    ui->l_Celerimetre->setText(QString("Célérimètre: %1 m/s").arg(QString::number(mLastCelerite,'f',1)));
+                    emit celReceived(mLastCelerite);
+                }
+
+
+            }
+
+
+
+        }
+
 
 
 }

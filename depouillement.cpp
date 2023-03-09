@@ -586,15 +586,15 @@ void Depouillement::exportCSV()
     }
 
     QTextStream fluxLogBook(&ficLogbook);
-    fluxLogBook.setEncoding(QStringConverter::Utf8);
+    fluxLogBook.setEncoding(QStringConverter::Latin1);
     fluxLogBook<<"Date/Heure;Equipement;Titre;Position;COG;SOG;Sonde;Commentaires;\r\n";
 
     QTextStream fluxSippican(&ficSippican);
-    fluxSippican.setEncoding(QStringConverter::Utf8);
+    fluxSippican.setEncoding(QStringConverter::Latin1);
     fluxSippican<<QString("Date/Heure;Position;COG;SOG;Sonde;Célérité à 3m;Célérimètre;Célérité SBE;Salinité;Température;Type de Sonde;Fichier ASVP;Fichier SIS;Heure de chargement;Commentaires;\r\n").toUtf8();
 
     QTextStream fluxEvent(&ficEvenement);
-    fluxEvent.setEncoding(QStringConverter::Utf8);
+    fluxEvent.setEncoding(QStringConverter::Latin1);
     fluxEvent<<"Date/Heure;Titre;Position;COG;SOG;Sonde;Commentaires;\r\n";
 
 
@@ -643,7 +643,7 @@ void Depouillement::exportCSV()
         }
 
         QTextStream fluxProfil(&ficProfil);
-        fluxProfil.setEncoding(QStringConverter::Utf8);
+        fluxProfil.setEncoding(QStringConverter::Latin1);
 
         fluxProfil<<QString("N° de profil;Fichier début;Fichier fin;Heure début;Heure Fin;Position début;Position fin;Durée;Distance(NM)\r\n").toUtf8();
         QString sPro;
@@ -691,7 +691,7 @@ void Depouillement::exportCSV()
         }
 
         QTextStream fluxArchi(&ficArchi);
-        fluxArchi.setEncoding(QStringConverter::Utf8);
+        fluxArchi.setEncoding(QStringConverter::Latin1);
 
         fluxArchi<<QString("Heure début;Heure Fin;Position début;Position fin;Durée\r\n").toUtf8();
 

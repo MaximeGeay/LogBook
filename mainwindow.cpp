@@ -5,7 +5,7 @@
 #include "ui_mainwindow.h"
 
 
-#define version "LogBook 0.5"
+#define version "LogBook 0.6"
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
