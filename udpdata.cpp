@@ -75,3 +75,4 @@ void UDPData::dataTimeout()
 {
     emit timeout();
 }
+

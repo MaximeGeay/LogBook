@@ -156,17 +156,27 @@ void NavData::readData(QString sTrame)
          }
 
 
-        if(sTrame.section(",",0,0).contains("MES")) //trames TECHSAS
+        if(sTrame.section(",",0,1).contains("MES")) //trames TECHSAS
         {
+
             //$CMMES,date,heure,SBE21, 0,0000.00,conductivité,T° prise d’eau,salinité,anomalie de densité,célérité,T° cuve
             //$CMMES,12/02/23,06:27:44.366,SBE21, 0,0000.00,04.012,011.561,035.320,026.921,1495.70,011.789
-            if(sTrame.section(",",3,3)=="SBE21" || sTrame.section(",",3,3)=="THSAL")
+            //"$PIFM,EUMES,05/08/23,14:02:11.333,THSAL, 0,0000.00,04.694,015.256,038.218,028.398,1511.22,015.485,\r\n"
+            if(sTrame.section(",",3,3)=="SBE21" || sTrame.section(",",3,4).contains("THSAL"))
             {
-                uneSBE.conductivite=sTrame.section(",",6,6).toDouble();
-                uneSBE.tempExt=sTrame.section(",",7,7).toDouble();
-                uneSBE.salinite=sTrame.section(",",8,8).toDouble();
-                uneSBE.celerite=sTrame.section(",",10,10).toDouble();
-                uneSBE.tempCuve=sTrame.section(",",11,11).toDouble();
+                int i=6;
+                if(sTrame.section(",",4,4)=="THSAL")
+                    i++;
+                uneSBE.conductivite=sTrame.section(",",i,i).toDouble();
+                i++;
+                uneSBE.tempExt=sTrame.section(",",i,i).toDouble();
+                i++;
+                uneSBE.salinite=sTrame.section(",",i,i).toDouble();
+                i=i+2;
+                uneSBE.celerite=sTrame.section(",",i,i).toDouble();
+                i++;
+                uneSBE.tempCuve=sTrame.section(",",i,i).toDouble();
+
                 uneSBE.dispo=true;
                 ui->l_salinite->setText(QString("Salinité: %1 psu").arg(uneSBE.salinite));
                 ui->l_CelSBE->setText(QString("Célérité SBE: %1 m/s").arg(uneSBE.celerite));
@@ -176,9 +186,11 @@ void NavData::readData(QString sTrame)
 
             }
 
-            if(sTrame.section(",",3,3)=="SNDSP"|| sTrame.section(",",3,3)=="SPEED")
+            if(sTrame.section(",",3,3)=="SNDSP")
             {
+                //"$PIFM,EUMES,05/08/23,14:02:10.970,SPEED, 0,1511.31,\r\n"
                 double dCel=sTrame.section(",",5,5).toDouble();
+
                 if(dCel>1400&&dCel<1600)
                 {
                     mLastCelerite=dCel;
@@ -188,6 +200,22 @@ void NavData::readData(QString sTrame)
 
 
             }
+            if( sTrame.section(",",4,4)=="SPEED")
+                        {
+                            //"$PIFM,EUMES,05/08/23,14:02:10.970,SPEED, 0,1511.31,\r\n"
+                            double dCel=sTrame.section(",",6,6).toDouble();
+
+                            if(dCel>1400&&dCel<1600)
+                            {
+                                mLastCelerite=dCel;
+                                ui->l_Celerimetre->setText(QString("Célérimètre: %1 m/s").arg(QString::number(mLastCelerite,'f',1)));
+                                emit celReceived(mLastCelerite);
+                            }
+
+
+                        }
+
+
 
 
 

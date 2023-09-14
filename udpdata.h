@@ -23,7 +23,6 @@ private slots:
     void readData();
     void dataTimeout();
 
-
 signals:
     void dataReceived(QString);
     void errorString(QString);
